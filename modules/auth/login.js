@@ -88,8 +88,8 @@ function loadMyInfoAPI(data) {
 function* signin(action) {
     try {
         const response = yield call(loginAPI, action.payload)
-        const result = response
-            .data
+        const result = response.data
+        // console.log(result,"result==========================================================")
         yield put({type: LOGIN_SUCCESS, payload: result})
         yield put({type: SAVE_TOKEN, payload: result.token})
         axios.defaults.headers.common["x-access-token"] =
