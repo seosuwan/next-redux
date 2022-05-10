@@ -36,9 +36,6 @@ const LOGOUT_REQUEST = 'auth/LOGOUT_REQUEST';
 const LOGOUT_SUCCESS = 'auth/LOGOUT_SUCCESS';
 const LOGOUT_FAILURE = 'auth/LOGOUT_FAILURE';
 const SAVE_TOKEN = 'auth/SAVE_TOKEN';
-const REFRESH_TOKEN_REQUEST = "auth/REFRESH_TOKEN_REQUEST";
-const REFRESH_TOKEN_SUCCESS = "auth/REFRESH_TOKEN_SUCCESS";
-// const REFRESH_TOKEN_FAILURE = "auth/REFRESH_TOKEN_FAILURE";
 const DELETE_TOKEN = 'auth/DELETEE_TOKEN';
 const LOAD_MY_INFO_REQUEST = 'auth/LOAD_MY_INFO_REQUEST'
 const LOAD_MY_INFO_SUCCESS = 'auth/LOAD_MY_INFO_SUCCESS'
@@ -48,33 +45,14 @@ export const loginRequest = createAction(LOGIN_REQUEST, data => data)
 export const loginCancelled = createAction(LOGIN_CANCELLED, data => data)
 export const logoutRequest = createAction(LOGOUT_REQUEST)
 export const loadMyInfReq = createAction(LOAD_MY_INFO_REQUEST, data => data)
-// export const refreshTokenRequest = createAction(REFRESH_TOKEN_REQUEST, data => data)
 
 export function* loginSaga() {
-    // yield takeLatest(REFRESH_TOKEN_REQUEST, refreshToken)
     yield takeLatest(LOGIN_REQUEST, signin);
     yield takeLatest(LOGIN_CANCELLED, loginCancel);
     yield takeLatest(LOGOUT_REQUEST, logout);
     yield takeLatest(LOAD_MY_INFO_REQUEST,loadMyInfo)
 }
-// export const refreshTokenSuccess = (payload) => ({
-//     type: REFRESH_TOKEN_SUCCESS,
-//     payload,
-//   });
 
-// function* refreshToken(action){
-//     try {
-//         const result = yield call(refreshTokenAPI, action.payload);
-//         const { refreshToken } = result.data.data;
-//         const setCookie = result.headers["set-cookie"]; // 응답 쿠키 저장
-//         yield put(
-//           refreshTokenSuccess({ refreshToken, setCookie })
-//         );
-//       } catch (err) {
-//         // yield put(refreshTokenFailure());
-//         console.log(err)
-//       }
-// }
 function loadMyInfoAPI(data) {
     return axios.get (`${SERVER}/user/loadMyInfoAPI`), {
       headers: {
@@ -106,11 +84,6 @@ function loadMyInfoAPI(data) {
       });
     }
   }
-// const refreshTokenAPI = payload => axios.post(
-//     `${SERVER}/user/refreshToken`,
-//     payload,
-//     {headers}
-// )
 
 function* signin(action) {
     try {
@@ -195,7 +168,9 @@ const login = handleActions({
     }),
     [LOAD_MY_INFO_REQUEST] : (state, action) =>({
         ...state,
-        token: action.payload
+        loginUser: action.payload,
+        // token: action.payload,
+        isLoggined: true
     })
 }, initialState)
 /**
