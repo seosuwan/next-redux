@@ -22,7 +22,6 @@ export const initialState = {
     loginUser: null,
     isLoggined: false,
     token: '',
-    accessToken: "",
     loginError: null,
 }
     
@@ -39,6 +38,7 @@ const SAVE_TOKEN = 'auth/SAVE_TOKEN';
 const DELETE_TOKEN = 'auth/DELETEE_TOKEN';
 const LOAD_MY_INFO_REQUEST = 'auth/LOAD_MY_INFO_REQUEST'
 const LOAD_MY_INFO_SUCCESS = 'auth/LOAD_MY_INFO_SUCCESS'
+const LOAD_MY_INFO_FAILURE = 'auth/LOAD_MY_INFO_FAILURE'
 
 
 export const loginRequest = createAction(LOGIN_REQUEST, data => data)
@@ -52,55 +52,42 @@ export function* loginSaga() {
     yield takeLatest(LOGOUT_REQUEST, logout);
     yield takeLatest(LOAD_MY_INFO_REQUEST,loadMyInfo)
 }
+const loadMyInfoAPI = () => axios.get(
+    
+    `${SERVER}/user/loadMyInfoAPI`,
+    {},
+    {headers},
 
-function loadMyInfoAPI(data) {
-    return axios.get (`${SERVER}/user/loadMyInfoAPI`), {
-      headers: {
-        "x-access-token": data,
-      },
-    };
-  }
+)
+
 
   function* loadMyInfo(action) {
       console.log("LOAD_MY_INFO_SUCCESS")
-    try {
-      const result = yield call(loadMyInfoAPI, action.data);
-      yield put({
-        type: LOAD_MY_INFO_SUCCESS,
-        data: result.data.data,
-      });
-     
-      cookie.save("accessToken", accessToken, {
-        path: "/",
-      });
-      cookie.save("refreshToken", refreshToken, {
-        path: "/",
-      });
-    } catch (err) {
-      console.error(err);
-      yield put({
-        type: LOAD_MY_INFO_FAILURE,
-        error: err.response.data,
-      });
-    }
-  }
+      try {
+        const response = yield call(loadMyInfoAPI, action.payload)
+        const result = response.data
+        yield put({type: LOAD_MY_INFO_SUCCESS, payload: result})
+        yield put({type: SAVE_TOKEN, payload: result.token})
 
+    
+        cookie.save("accessToken", accessToken, {
+            path: "/",
+          });
+        
+    }catch (error) {
+        yield put({type: LOGIN_FAILURE, payload: error.message})
+    }
+}
+ 
 function* signin(action) {
     try {
         const response = yield call(loginAPI, action.payload)
         const result = response.data
-        // console.log(result,"result==========================================================")
         yield put({type: LOGIN_SUCCESS, payload: result})
         yield put({type: SAVE_TOKEN, payload: result.token})
-        axios.defaults.headers.common["x-access-token"] =
-        result.data.accessToken;
-    
-    //   cookie.save("accessToken", accessToken, {
-    //     path: "/",
-    //   });
-      cookie.save("refreshToken", refreshToken, {
-        path: "/",
-      });
+        // const token = response.headers['set-cookie']
+        // res.setHeader('Set-Cookie', `token=${token}; path=/;`)
+        
     }catch (error) {
         yield put({type: LOGIN_FAILURE, payload: error.message})
     }
@@ -110,6 +97,7 @@ const loginAPI = payload => axios.post(
     `${SERVER}/user/login`,
     payload,
     {headers},
+
 )
 function* logout(){
     try{
@@ -171,6 +159,10 @@ const login = handleActions({
         loginUser: action.payload,
         // token: action.payload,
         isLoggined: true
+    }),
+    [LOAD_MY_INFO_FAILURE] : (state, action) =>({
+        ...state,
+        loginError: action.payload
     })
 }, initialState)
 /**

@@ -2,9 +2,11 @@ import styles from "@/styles/Home.module.css";
 
 
 
-export function Home({}) {
+export function Home({loginUser}) {
     return (
      <> 
+     
+     <h1>안녕하십미까 {loginUser}</h1>
      < header className = {styles.w3DisplayContainer+ ' ' + styles.w3Content+ ' ' + styles.w3Center} style = {{maxWidth:"1500px"}} > <img
         className={styles.w3Image}
             src="https://www.w3schools.com/w3images/photographer.jpg"
